@@ -59,6 +59,7 @@ class CollatedTrajectoryBuilder : public TrajectoryBuilderInterface {
 
   void AddSensorData(const std::string& sensor_id,
                      const sensor::ImuData& imu_data) override {
+    LOG(INFO) << "CollatedTrajectoryBuilder>imu";
     AddData(sensor::MakeDispatchable(sensor_id, imu_data));
   }
 

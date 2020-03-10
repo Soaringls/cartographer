@@ -37,6 +37,10 @@ class OccupiedSpaceCostFunction2D {
 
   template <typename T>
   bool operator()(const T* const pose, T* residual) const {
+    LOG(INFO)<<"-----------------------------------";
+    LOG(INFO)<<"pose[0]: "<<pose[0]<<" ";
+    LOG(INFO)<<"pose[1]: "<<pose[1]<<" ";
+    LOG(INFO)<<"pose[2]: "<<pose[2]<<" ";
     Eigen::Matrix<T, 2, 1> translation(pose[0], pose[1]);
     Eigen::Rotation2D<T> rotation(pose[2]);
     Eigen::Matrix<T, 2, 2> rotation_matrix = rotation.toRotationMatrix();
@@ -51,7 +55,7 @@ class OccupiedSpaceCostFunction2D {
       // Note that this is a 2D point. The third component is a scaling factor.
       const Eigen::Matrix<T, 3, 1> point((T(point_cloud_[i].x())),
                                          (T(point_cloud_[i].y())), T(1.));
-      const Eigen::Matrix<T, 3, 1> world = transform * point;
+      const Eigen::Matrix<T, 3, 1> world = transform * point;//每个点的全局坐标(以出发点为原点为坐标系)
       interpolator.Evaluate(
           (limits.max().x() - world[0]) / limits.resolution() - 0.5 +
               static_cast<double>(kPadding),
@@ -74,7 +78,7 @@ class OccupiedSpaceCostFunction2D {
     void GetValue(const int row, const int column, double* const value) const {
       if (row < kPadding || column < kPadding || row >= NumRows() - kPadding ||
           column >= NumCols() - kPadding) {
-        *value = kMaxCorrespondenceCost;
+        *value = kMaxCorrespondenceCost; //0.9
       } else {
         *value = static_cast<double>(grid_.GetCorrespondenceCost(
             Eigen::Array2i(column - kPadding, row - kPadding)));

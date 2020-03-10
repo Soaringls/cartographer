@@ -135,15 +135,16 @@ transform::Rigid3d PoseExtrapolator::ExtrapolatePose(const common::Time time) {
   const TimedPose& newest_timed_pose = timed_pose_queue_.back();
   CHECK_GE(time, newest_timed_pose.time);
   if (cached_extrapolated_pose_.time != time) {
-    const Eigen::Vector3d translation =
+    const Eigen::Vector3d translation =  //相对小车起始点的坐标  red-X green-Y
         ExtrapolateTranslation(time) + newest_timed_pose.pose.translation();
+    // LOG(INFO)<<"ExtrapolatePose::translation:"<<translation.transpose();
     const Eigen::Quaterniond rotation =
-        newest_timed_pose.pose.rotation() *
+        newest_timed_pose.pose.rotation() * //局部 动态坐标系下变换的变换矩阵,右乘
         ExtrapolateRotation(time, extrapolation_imu_tracker_.get());
     cached_extrapolated_pose_ =
         TimedPose{time, transform::Rigid3d{translation, rotation}};
   }
-  return cached_extrapolated_pose_.pose;
+  return cached_extrapolated_pose_.pose;  
 }
 
 Eigen::Quaterniond PoseExtrapolator::EstimateGravityOrientation(
@@ -175,7 +176,7 @@ void PoseExtrapolator::UpdateVelocitiesFromPoses() {
       (newest_pose.translation() - oldest_pose.translation()) / queue_delta;
   angular_velocity_from_poses_ =
       transform::RotationQuaternionToAngleAxisVector(
-          oldest_pose.rotation().inverse() * newest_pose.rotation()) /
+          oldest_pose.rotation().inverse() * newest_pose.rotation()) / //局部 动态坐标系下变换的变换矩阵,右乘
       queue_delta;
 }
 

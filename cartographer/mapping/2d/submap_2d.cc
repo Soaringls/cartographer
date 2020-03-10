@@ -191,6 +191,7 @@ ActiveSubmaps2D::CreateRangeDataInserter() {
 
 std::unique_ptr<GridInterface> ActiveSubmaps2D::CreateGrid(
     const Eigen::Vector2f& origin) {
+  // LOG(INFO)<<"submap.origin:"<<origin.transpose(); origin是相对小车出发点的坐标
   constexpr int kInitialSubmapSize = 100;
   float resolution = options_.grid_options_2d().resolution();
   switch (options_.grid_options_2d().grid_type()) {

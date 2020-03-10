@@ -30,7 +30,10 @@ sensor::TimedPointCloudOriginData RangeDataCollator::AddRangeData(
     const sensor::TimedPointCloudData& timed_point_cloud_data) {
   CHECK_NE(expected_sensor_ids_.count(sensor_id), 0);
   // TODO(gaschler): These two cases can probably be one.
+  // LOG(INFO) << "++++++++++++++++++++++++++++++++++++++++++++++++++";
+  // LOG(INFO) << "sensor_id: " << sensor_id;
   if (id_to_pending_data_.count(sensor_id) != 0) {
+    LOG(INFO) <<"id_to_pending_data_.count(sensor_id) !=v0";
     current_start_ = current_end_;
     // When we have two messages of the same sensor, move forward the older of
     // the two (do not send out current).
@@ -41,12 +44,16 @@ sensor::TimedPointCloudOriginData RangeDataCollator::AddRangeData(
   }
   id_to_pending_data_.emplace(sensor_id, timed_point_cloud_data);
   if (expected_sensor_ids_.size() != id_to_pending_data_.size()) {
+    LOG(INFO) <<"expected_sensor_ids_.size() != id_to_pending_data_.size()";
     return {};
   }
   current_start_ = current_end_;
   // We have messages from all sensors, move forward to oldest.
   common::Time oldest_timestamp = common::Time::max();
   for (const auto& pair : id_to_pending_data_) {
+    // LOG(INFO) << "pair.first: " << pair.first;
+    // LOG(INFO)<<"pair.second.time: "<<pair.second.time;
+    // LOG(INFO)<<"pair.second.ranges.size: "<<pair.second.ranges.size();
     oldest_timestamp = std::min(oldest_timestamp, pair.second.time);
   }
   current_end_ = oldest_timestamp;
@@ -93,7 +100,7 @@ sensor::TimedPointCloudOriginData RangeDataCollator::CropAndMerge() {
         result.ranges.push_back(point);
       }
     }
-
+    // LOG(INFO) << "forforforforforforforforforforforforforforforforforfor";
     // Drop buffered points until overlap_end.
     if (overlap_end == ranges.end()) {
       it = id_to_pending_data_.erase(it);
@@ -112,6 +119,7 @@ sensor::TimedPointCloudOriginData RangeDataCollator::CropAndMerge() {
                const sensor::TimedPointCloudOriginData::RangeMeasurement& b) {
               return a.point_time[3] < b.point_time[3];
             });
+  // LOG(INFO) << "--------------------------------------------------";
   return result;
 }
 

@@ -60,11 +60,11 @@ CeresScanMatcher2D::CeresScanMatcher2D(
 
 CeresScanMatcher2D::~CeresScanMatcher2D() {}
 
-void CeresScanMatcher2D::Match(const Eigen::Vector2d& target_translation,
-                               const transform::Rigid2d& initial_pose_estimate,
+void CeresScanMatcher2D::Match(const Eigen::Vector2d& target_translation, //观测样本值
+                               const transform::Rigid2d& initial_pose_estimate,//ceres优化参数的初值
                                const sensor::PointCloud& point_cloud,
                                const Grid2D& grid,
-                               transform::Rigid2d* const pose_estimate,
+                               transform::Rigid2d* const pose_estimate,//ceres优化参数的结果
                                ceres::Solver::Summary* const summary) const {
   double ceres_pose_estimate[3] = {initial_pose_estimate.translation().x(),
                                    initial_pose_estimate.translation().y(),
@@ -100,6 +100,15 @@ void CeresScanMatcher2D::Match(const Eigen::Vector2d& target_translation,
       nullptr /* loss function */, ceres_pose_estimate);
 
   ceres::Solve(ceres_solver_options_, &problem, summary);
+
+//   LOG(INFO)<<"Before optimize.................";
+//   LOG(INFO)<<"initial_pose_estimate.X: "<<initial_pose_estimate.translation().x();
+//   LOG(INFO)<<"initial_pose_estimate.Y: "<<initial_pose_estimate.translation().y();
+//   LOG(INFO)<<"initial_pose_estimate.A: "<<initial_pose_estimate.rotation().angle();
+//   LOG(INFO)<<"After optimize...";
+//   LOG(INFO)<<"X: "<<ceres_pose_estimate[0];
+//   LOG(INFO)<<"Y: "<<ceres_pose_estimate[1];
+//   LOG(INFO)<<"A: "<<ceres_pose_estimate[2];
 
   *pose_estimate = transform::Rigid2d(
       {ceres_pose_estimate[0], ceres_pose_estimate[1]}, ceres_pose_estimate[2]);

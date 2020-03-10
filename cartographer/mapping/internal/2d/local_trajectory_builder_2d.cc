@@ -72,7 +72,7 @@ std::unique_ptr<transform::Rigid2d> LocalTrajectoryBuilder2D::ScanMatch(
       active_submaps_.submaps().front();
   // The online correlative scan matcher will refine the initial estimate for
   // the Ceres scan matcher.
-  transform::Rigid2d initial_ceres_pose = pose_prediction;
+  transform::Rigid2d initial_ceres_pose = pose_prediction;//ceres优化参数的初值
 
   if (options_.use_online_correlative_scan_matching()) {
     CHECK_EQ(options_.submaps_options().grid_options_2d().grid_type(),
@@ -84,8 +84,10 @@ std::unique_ptr<transform::Rigid2d> LocalTrajectoryBuilder2D::ScanMatch(
     kRealTimeCorrelativeScanMatcherScoreMetric->Observe(score);
   }
 
-  auto pose_observation = absl::make_unique<transform::Rigid2d>();
+  auto pose_observation = absl::make_unique<transform::Rigid2d>(); //ceres优化参数的结果
   ceres::Solver::Summary summary;
+
+  //pose_prediction.translation()为平移部分观测值
   ceres_scan_matcher_.Match(pose_prediction.translation(), initial_ceres_pose,
                             filtered_gravity_aligned_point_cloud,
                             *matching_submap->grid(), pose_observation.get(),
@@ -170,6 +172,8 @@ LocalTrajectoryBuilder2D::AddRangeData(
     const Eigen::Vector3f origin_in_local =
         range_data_poses[i] *
         synchronized_data.origins.at(synchronized_data.ranges[i].origin_index);
+    // LOG(INFO)<<"synchronized_data.origins "<<i+1<<" origins is "<<
+    //           synchronized_data.origins.at(synchronized_data.ranges[i].origin_index);
     const Eigen::Vector3f hit_in_local = range_data_poses[i] * hit.head<3>();
     const Eigen::Vector3f delta = hit_in_local - origin_in_local;
     const float range = delta.norm();

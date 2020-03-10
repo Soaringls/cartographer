@@ -203,6 +203,10 @@ target_include_directories(${PROJECT_NAME} SYSTEM PUBLIC
 target_link_libraries(${PROJECT_NAME} PUBLIC ${EIGEN3_LIBRARIES})
 
 target_include_directories(${PROJECT_NAME} SYSTEM PUBLIC
+  "${GLOG_INCLUDE_DIRS}")
+target_link_libraries(${PROJECT_NAME} PUBLIC ${GLOG_LIBRARY_DIRS})
+
+target_include_directories(${PROJECT_NAME} SYSTEM PUBLIC
   "${CERES_INCLUDE_DIRS}")
 target_link_libraries(${PROJECT_NAME} PUBLIC ${CERES_LIBRARIES})
 

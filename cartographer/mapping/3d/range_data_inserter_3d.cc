@@ -75,7 +75,7 @@ RangeDataInserter3D::RangeDataInserter3D(
       miss_table_(
           ComputeLookupTableToApplyOdds(Odds(options_.miss_probability()))) {}
 
-void RangeDataInserter3D::Insert(const sensor::RangeData& range_data,
+void RangeDataInserter3D::Insert(const sensor::RangeData& range_data, //tracking坐标系下
                                  HybridGrid* hybrid_grid) const {
   CHECK_NOTNULL(hybrid_grid);
 

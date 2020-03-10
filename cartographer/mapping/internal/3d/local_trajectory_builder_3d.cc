@@ -176,6 +176,7 @@ LocalTrajectoryBuilder3D::AddRangeData(
   }
 
   for (size_t i = 0; i < hits.size(); ++i) {
+    //将hits中每个点转换到以小车起始原点的全局坐标系下，即local坐标系
     const Eigen::Vector3f hit_in_local =
         hits_poses[i] * hits[i].point_time.head<3>();
     const Eigen::Vector3f origin_in_local =
@@ -241,7 +242,7 @@ LocalTrajectoryBuilder3D::AddAccumulatedRangeData(
     LOG(WARNING) << "Dropped empty range data.";
     return nullptr;
   }
-  const transform::Rigid3d pose_prediction =
+  const transform::Rigid3d pose_prediction =  //以小车起始原点的全局坐标系下，即local坐标系
       extrapolator_->ExtrapolatePose(time);
 
   const auto scan_matcher_start = std::chrono::steady_clock::now();
@@ -284,6 +285,8 @@ LocalTrajectoryBuilder3D::AddAccumulatedRangeData(
 
   const Eigen::Quaterniond gravity_alignment =
       extrapolator_->EstimateGravityOrientation(time);
+  
+  //小车运动原点坐标系->起始出发点为原点的local全局坐标系
   sensor::RangeData filtered_range_data_in_local = sensor::TransformRangeData(
       filtered_range_data_in_tracking, pose_estimate->cast<float>());
 
@@ -351,9 +354,10 @@ LocalTrajectoryBuilder3D::InsertIntoSubmap(
   if (motion_filter_.IsSimilar(time, pose_estimate)) {
     return nullptr;
   }
-  std::vector<std::shared_ptr<const mapping::Submap3D>> insertion_submaps =
-      active_submaps_.InsertRangeData(filtered_range_data_in_local,
+  std::vector<std::shared_ptr<const mapping::Submap3D>> insertion_submaps = //insertion_submaps最大为2
+      active_submaps_.InsertRangeData(filtered_range_data_in_local, //以起点为原点的全局local坐标系
                                       gravity_alignment);
+  // LOG(INFO)<<"insertion_submaps.size():"<<insertion_submaps.size();
   const Eigen::VectorXf rotational_scan_matcher_histogram =
       scan_matching::RotationalScanMatcher::ComputeHistogram(
           sensor::TransformPointCloud(
